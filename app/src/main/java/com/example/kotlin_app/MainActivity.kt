@@ -1,5 +1,7 @@
 package com.example.kotlin_app
 
+import Login
+import MainView
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,22 +19,12 @@ class MainActivity : ComponentActivity() {
             Kotlin_appTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    Greeting("Android")
+                    MainView()
+
+
                 }
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    Kotlin_appTheme {
-        Greeting("Android")
-    }
-}
