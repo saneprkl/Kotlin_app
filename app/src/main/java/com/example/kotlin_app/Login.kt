@@ -1,16 +1,25 @@
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.material.Text
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.kotlin_app.LoggedInView
+import com.example.kotlin_app.R
+
+const val Home = "home"
+const val Note = "note"
 
 @Composable
 fun MainView() {
@@ -19,9 +28,88 @@ fun MainView() {
     if(view.username.value.isEmpty()) {
         Login(view)
     } else {
-        Text(text = view.username.value)
+        MainScaffold()
     }
 }
+
+@Composable
+fun MainScaffold() {
+
+    val navController = rememberNavController()
+
+    Scaffold(
+        topBar = { TopBar() },
+        bottomBar = { BottomBar(navController) },
+        content = { ContentView(navController) }
+    )
+}
+
+@Composable
+fun TopBar() {
+    val view = viewModel<LoggedInView>()
+
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .background(Color(0xFFBB86FC))
+        .padding(10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = view.username.value)
+        OutlinedButton(onClick = { view.logout() }) {
+            Text(text = "Log out")
+        }
+    }
+}
+
+@Composable
+fun BottomBar(navController: NavHostController) {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .background(Color(0xFFBB86FC)),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically 
+    ){
+        Icon(
+            painter = painterResource(id = R.drawable.ic_baseline_home_24),
+            contentDescription = "home",
+            modifier = Modifier.clickable { navController.navigate(Home) })
+        Icon(
+            painter = painterResource(id = R.drawable.ic_note),
+            contentDescription = "note",
+            modifier = Modifier.clickable { navController.navigate(Note) })
+    }
+}
+
+@Composable
+fun ContentView(navController: NavHostController) {
+    NavHost(navController = navController, startDestination = Home ) {
+        composable( route = Home ) { HomeView() }
+        composable( route = Note ) { NoteView() }
+    }
+}
+
+@Composable
+fun HomeView() {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(Color(0xFF523870))
+    ) {
+
+    }
+}
+
+@Composable
+fun NoteView() {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(Color(0xFFBBAACF))
+    ) {
+
+    }
+}
+
+
 // Login credentials: sane@sane.com, asd123
 @Composable
 fun Login(view: LoggedInView) {
