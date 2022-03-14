@@ -5,6 +5,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -50,7 +51,7 @@ fun TopBar() {
 
     Row(modifier = Modifier
         .fillMaxWidth()
-        .background(Color(0xFFBB86FC))
+        .background(Brush.horizontalGradient(colors = listOf( Color.Blue, Color.Red)))
         .padding(10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -66,7 +67,7 @@ fun TopBar() {
 fun BottomBar(navController: NavHostController) {
     Row(modifier = Modifier
         .fillMaxWidth()
-        .background(Color(0xFFBB86FC)),
+        .background(Brush.horizontalGradient(colors = listOf( Color.Red, Color.Blue))),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically 
     ){
@@ -91,11 +92,29 @@ fun ContentView(navController: NavHostController) {
 
 @Composable
 fun HomeView() {
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(Color(0xFF523870))
-    ) {
+    var inputPlaceholder by remember { mutableStateOf("") }
 
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF7F7F7))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp),
+            verticalArrangement = Arrangement.SpaceEvenly,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(
+                value = inputPlaceholder,
+                onValueChange = { inputPlaceholder = it },
+                label = { Text(text = "Search for a city ...") }
+            )
+            OutlinedButton(onClick = {  } ) {
+                Text(text = "Search")
+            }
+        }
     }
 }
 
@@ -103,7 +122,7 @@ fun HomeView() {
 fun NoteView() {
     Column(modifier = Modifier
         .fillMaxSize()
-        .background(Color(0xFFBBAACF))
+        .background(Color(0xFFC9AFE9))
     ) {
 
     }
