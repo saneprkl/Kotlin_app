@@ -10,17 +10,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.kotlin_app.LoggedInView
+import com.example.kotlin_app.*
 import com.example.kotlin_app.R
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 const val Home = "home"
 const val Note = "note"
+const val Error = "error"
 
 @Composable
 fun MainView() {
@@ -51,12 +55,15 @@ fun TopBar() {
 
     Row(modifier = Modifier
         .fillMaxWidth()
-        .background(Brush.horizontalGradient(colors = listOf( Color.Blue, Color.Red)))
+        .background(Brush.horizontalGradient(colors = listOf(Color.Blue, Color.Red)))
         .padding(10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = view.username.value)
+        Text(
+            color = Color.White,
+            fontSize = 22.sp,
+            text = view.username.value)
         OutlinedButton(onClick = { view.logout() }) {
             Text(text = "Log out")
         }
@@ -65,9 +72,10 @@ fun TopBar() {
 
 @Composable
 fun BottomBar(navController: NavHostController) {
+
     Row(modifier = Modifier
         .fillMaxWidth()
-        .background(Brush.horizontalGradient(colors = listOf( Color.Red, Color.Blue))),
+        .background(Brush.horizontalGradient(colors = listOf(Color.Red, Color.Blue))),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically 
     ){
@@ -85,14 +93,16 @@ fun BottomBar(navController: NavHostController) {
 @Composable
 fun ContentView(navController: NavHostController) {
     NavHost(navController = navController, startDestination = Home ) {
-        composable( route = Home ) { HomeView() }
+        composable( route = Home ) { HomeView(navController) }
         composable( route = Note ) { NoteView() }
+        composable( route = Error ) { ErrorView() }
     }
 }
 
 @Composable
-fun HomeView() {
-    var inputPlaceholder by remember { mutableStateOf("") }
+fun HomeView(navController: NavHostController) {
+    var input by remember { mutableStateOf("") }
+    val fetchCity = viewModel<WeatherViewModel>()
 
     Column(
         modifier = Modifier
@@ -107,11 +117,11 @@ fun HomeView() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             OutlinedTextField(
-                value = inputPlaceholder,
-                onValueChange = { inputPlaceholder = it },
+                value = input,
+                onValueChange = { input = it },
                 label = { Text(text = "Search for a city ...") }
             )
-            OutlinedButton(onClick = {  } ) {
+            OutlinedButton(onClick = { /*fetchCity.getCityData()*/navController.navigate(Error) } ) {
                 Text(text = "Search")
             }
         }
@@ -120,16 +130,70 @@ fun HomeView() {
 
 @Composable
 fun NoteView() {
+    val fireStore = Firebase.firestore
+    val user = FirebaseUser("Santeri", "Lehtonen")
+
+    fireStore
+        .collection("users")
+        .document("0000")
+        .set(user)
+
+    var note by remember { mutableStateOf("") }
+    var date by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf("") }
+
     Column(modifier = Modifier
         .fillMaxSize()
-        .background(Color(0xFFC9AFE9))
+        .background(Color(0xFFB5CA7A)),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(text = "Welcome " + user.fname + " " + user.lname, modifier = Modifier.padding(10.dp))
+        Text(text = "Send notes ", modifier = Modifier.padding(10.dp))
 
+        OutlinedTextField(
+            modifier = Modifier.padding(10.dp),
+            value = title,
+            onValueChange = { title = it },
+            label = { Text(text = "Title") }
+        )
+
+        OutlinedTextField(
+            modifier = Modifier.padding(10.dp),
+            value = date,
+            onValueChange = { date = it },
+            label = { Text(text = "Date") }
+        )
+
+        OutlinedTextField(
+            modifier = Modifier
+                .padding(10.dp)
+                .height(200.dp),
+            value = note,
+            onValueChange = { note = it },
+            label = { Text(text = "My notes") }
+        )
+
+        OutlinedButton(onClick = { fireStore.collection("notes").add(Notes(title, date, note)) } ) {
+            Text(text = "Send note", modifier = Modifier.padding(10.dp))
+        }
+    }
+}
+
+@Composable
+fun ErrorView () {
+    Column(modifier = Modifier
+        .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(text = "Error",
+            color = Color.Red,
+            fontSize = 34.sp)
     }
 }
 
 
-// Login credentials: sane@sane.com, asd123
+// Login credentials: email: sane@sane.com, password: asd123
 @Composable
 fun Login(view: LoggedInView) {
     var email by remember { mutableStateOf("") }
