@@ -1,4 +1,6 @@
+import android.text.TextUtils.indexOf
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -25,6 +27,8 @@ import com.google.firebase.ktx.Firebase
 const val Home = "home"
 const val Note = "note"
 const val Error = "error"
+const val Nav = "nav"
+const val StoredNotes = "storedNotes"
 
 @Composable
 fun MainView() {
@@ -85,8 +89,26 @@ fun BottomBar(navController: NavHostController) {
             modifier = Modifier.clickable { navController.navigate(Home) })
         Icon(
             painter = painterResource(id = R.drawable.ic_note),
-            contentDescription = "note",
-            modifier = Modifier.clickable { navController.navigate(Note) })
+            contentDescription = "nav",
+            modifier = Modifier.clickable { navController.navigate(Nav) })
+    }
+}
+
+@Composable
+fun NavigationButton(navController: NavHostController){
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF7F7F7)),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        OutlinedButton(modifier = Modifier.padding(10.dp), onClick = { navController.navigate(Note) } ) {
+            Text(text = "Add a new note", modifier = Modifier.padding(10.dp))
+        }
+        OutlinedButton(modifier = Modifier.padding(10.dp), onClick = { navController.navigate(StoredNotes) } ) {
+            Text(text = "See my notes", modifier = Modifier.padding(10.dp))
+        }
     }
 }
 
@@ -94,8 +116,10 @@ fun BottomBar(navController: NavHostController) {
 fun ContentView(navController: NavHostController) {
     NavHost(navController = navController, startDestination = Home ) {
         composable( route = Home ) { HomeView(navController) }
+        composable( route = Nav ) { NavigationButton(navController) }
         composable( route = Note ) { NoteView() }
         composable( route = Error ) { ErrorView() }
+        composable( route = StoredNotes ) { StoredNotesView() }
     }
 }
 
@@ -148,7 +172,7 @@ fun NoteView() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Welcome " + user.fname + " " + user.lname, modifier = Modifier.padding(10.dp))
-        Text(text = "Send notes ", modifier = Modifier.padding(10.dp))
+        Text(text = "Create a note", modifier = Modifier.padding(10.dp))
 
         OutlinedTextField(
             modifier = Modifier.padding(10.dp),
@@ -201,27 +225,79 @@ fun Login(view: LoggedInView) {
 
     Column (
         modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp),
+            .fillMaxWidth(),
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally
             ) {
+        Column(
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Text(modifier = Modifier.padding(2.dp), text = "email: sane@sane.com")
+            Text(modifier = Modifier.padding(2.dp), text = "password: asd123")
+        }
+
         OutlinedTextField(
+            modifier = Modifier.padding(5.dp),
             value = email,
             onValueChange = { email = it },
             label = { Text(text = "Email") }
         )
 
         OutlinedTextField(
+            modifier = Modifier.padding(5.dp),
             value = password,
             onValueChange = { password = it },
             label = { Text(text = "Password") },
             visualTransformation = PasswordVisualTransformation()
         )
-        OutlinedButton(onClick = { view.login(email, password) } ) {
+        OutlinedButton(modifier = Modifier.padding(25.dp), onClick = { view.login(email, password) } ) {
             Text(text = "Login")
         }
-
-
     }
+}
+
+@Composable
+fun StoredNotesView() {
+    val notesVM: NotesViewModel = viewModel()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        var index = 0
+        for(i in notesVM.notes.value) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+                    .border(1.dp, color = Color.Red),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if(notesVM.titles.value[index] != "null") {
+                    Text(
+                        text = notesVM.titles.value[index],
+                        modifier = Modifier
+                            .padding(3.dp)
+                    )
+                }
+                if(notesVM.dates.value[index] != "null") {
+                    Text(
+                        text = notesVM.dates.value[index],
+                        modifier = Modifier
+                            .padding(3.dp)
+                    )
+                }
+                Text(
+                    text = i,
+                    modifier = Modifier
+                        .padding(10.dp)
+                )
+            }
+            index++
+        }
+    }
+
 }
